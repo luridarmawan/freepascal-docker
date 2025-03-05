@@ -1,3 +1,5 @@
+# Build
+#   docker build -f Dockerfile --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t luri/free-pascal .
 FROM ubuntu:20.04
 
 SHELL ["/bin/bash", "-c"]
@@ -5,7 +7,7 @@ SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -qq && \
     apt-get install -y build-essential binutils wget tzdata && \
-    apt-get install -y apache2 git curl libtool zip nano ftp && \
+    apt-get install -y apache2 git curl libtool zip nano sshpass ftp lftp && \
     apt-get install --fix-missing && \
     apt-get clean
 
@@ -31,7 +33,9 @@ ENV FPC_VERSION="3.2.2"
 # trunk: ftp://ftp.freepascal.org/pub/fpc/snapshot/trunk/source/fpc.zip
 RUN ARCH=$(uname -m)-linux && \
     cd /tmp && \
-    wget "ftp://ftp.freepascal.org/pub/fpc/dist/${FPC_VERSION}/${ARCH}/fpc-${FPC_VERSION}?${ARCH}.tar" -O fpc.tar && \
+    #wget "ftp://ftp.freepascal.org/pub/fpc/dist/${FPC_VERSION}/${ARCH}/fpc-${FPC_VERSION}?${ARCH}.tar" -O fpc.tar && \
+    wget "https://onboardcloud.dl.sourceforge.net/project/freepascal/Linux/${FPC_VERSION}/fpc-${FPC_VERSION}.${ARCH}.tar" -O fpc.tar && \
+    #wget "http://downloads.freepascal.org/fpc/dist/${FPC_VERSION}/${ARCH}/fpc-${FPC_VERSION}.${ARCH}.tar" -O fpc.tar && \
     tar xf fpc.tar && \
     cd fpc-${FPC_VERSION}?${ARCH} && \
     rm demo* doc* && \
