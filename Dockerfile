@@ -1,5 +1,8 @@
 # Build
 #   docker build -f Dockerfile --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t luri/free-pascal .
+# Build multi-arch Docker image
+#   docker buildx build --platform linux/amd64,linux/arm64 -t luri/free-pascal:multiarch --push .
+
 FROM ubuntu:20.04
 
 SHELL ["/bin/bash", "-c"]
@@ -30,14 +33,25 @@ ADD ./app/ /app
 
 ENV FPC_VERSION="3.2.2"
 
-# trunk: ftp://ftp.freepascal.org/pub/fpc/snapshot/trunk/source/fpc.zip
-RUN ARCH=$(uname -m)-linux && \
+# Install Free Pascal dengan dukungan multi-arch
+#RUN ARCH=$(uname -m)-linux && \
+RUN ARCH=$(dpkg --print-architecture) && \
     cd /tmp && \
-    #wget "ftp://ftp.freepascal.org/pub/fpc/dist/${FPC_VERSION}/${ARCH}/fpc-${FPC_VERSION}?${ARCH}.tar" -O fpc.tar && \
-    wget "https://onboardcloud.dl.sourceforge.net/project/freepascal/Linux/${FPC_VERSION}/fpc-${FPC_VERSION}.${ARCH}.tar" -O fpc.tar && \
-    #wget "http://downloads.freepascal.org/fpc/dist/${FPC_VERSION}/${ARCH}/fpc-${FPC_VERSION}.${ARCH}.tar" -O fpc.tar && \
+    if [ "$ARCH" = "amd64" ]; then \
+        wget "https://onboardcloud.dl.sourceforge.net/project/freepascal/Linux/${FPC_VERSION}/fpc-${FPC_VERSION}.x86_64-linux.tar" -O fpc.tar; \
+    elif [ "$ARCH" = "arm64" ]; then \
+        wget "https://onboardcloud.dl.sourceforge.net/project/freepascal/Linux/${FPC_VERSION}/fpc-${FPC_VERSION}.aarch64-linux.tar" -O fpc.tar; \
+    else \
+        echo "Architecture not supported!" && exit 1; \
+    fi && \
     tar xf fpc.tar && \
-    cd fpc-${FPC_VERSION}?${ARCH} && \
+    cd fpc-${FPC_VERSION}* && \
     rm demo* doc* && \
     echo -e '\n' | ./install.sh && \
     rm -r /tmp/*
+
+
+# FPC Download alternative
+# - wget "ftp://ftp.freepascal.org/pub/fpc/dist/${FPC_VERSION}/${ARCH}/fpc-${FPC_VERSION}?${ARCH}.tar" -O fpc.tar && \
+# - wget "https://onboardcloud.dl.sourceforge.net/project/freepascal/Linux/${FPC_VERSION}/fpc-${FPC_VERSION}.${ARCH}.tar" -O fpc.tar && \
+# - wget "http://downloads.freepascal.org/fpc/dist/${FPC_VERSION}/${ARCH}/fpc-${FPC_VERSION}.${ARCH}.tar" -O fpc.tar && \
