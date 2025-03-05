@@ -9,10 +9,12 @@ SHELL ["/bin/bash", "-c"]
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -qq && \
+    apt-get install -y ca-certificates && \
     apt-get install -y build-essential binutils wget tzdata && \
     apt-get install -y apache2 git curl libtool zip nano sshpass ftp lftp iputils-ping telnet && \
     apt-get install --fix-missing && \
-    apt-get clean
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Apache Setup
 ADD config/apache/000-default.conf /etc/apache2/sites-enabled/
