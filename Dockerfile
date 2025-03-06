@@ -1,17 +1,18 @@
 # Build
 #   docker build -f Dockerfile --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -t luri/free-pascal .
 # Build multi-arch Docker image
-#   docker buildx build --platform linux/amd64,linux/arm64 -t luri/free-pascal:multiarch --push .
+#   docker buildx build --platform linux/amd64,linux/arm64 -t luri/free-pascal:multiarch .
 
-FROM ubuntu:20.04
+FROM ubuntu:24.10
 
 SHELL ["/bin/bash", "-c"]
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -qq && \
-    apt-get install -y ca-certificates && \
+    apt-get install -y ca-certificates openssl && \
     apt-get install -y build-essential binutils wget tzdata && \
     apt-get install -y apache2 git curl libtool zip nano sshpass ftp lftp iputils-ping telnet && \
+    apt install -y libmysqlclient21 && \
     apt-get install --fix-missing && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
